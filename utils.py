@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse
 
 
 def clear_video_file():
@@ -20,3 +21,8 @@ def prepare_urls(urls):
         if url.startswith(("twitter", "www")):
             urls[index] = "https://" + url
     return urls
+
+
+def get_url_domain(url):
+    parsed_url = urlparse(url)
+    return parsed_url.netloc

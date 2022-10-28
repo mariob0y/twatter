@@ -1,19 +1,18 @@
 import asyncio
-import os
 import telebot
-from tweetcapture import TweetCapture
 from urlextract import URLExtract
 from youtube_dl.YoutubeDL import YoutubeDL
 from youtube_dl.utils import DownloadError, UnsupportedError
-from const import TOKEN, IMAGE_FILE
-from utils import clear_video_file, get_video_file, prepare_urls
+from const import TOKEN, IMAGE_FILE, LOCATORS
+from utils import clear_video_file, get_video_file, prepare_urls, get_url_domain
+from screenshot import make_screenshot
+import imghdr
 
 
 telebot.apihelper.ENABLE_MIDDLEWARE = True
 
 bot = telebot.TeleBot(TOKEN)
 url_extractor = URLExtract()
-tweet_capture = TweetCapture()
 video_downloader = YoutubeDL(
     params={"outtmpl": "video.mp4", "extract_flat": "in_playlist"}
 )
@@ -38,18 +37,23 @@ def get_text_messages(message):
     for url in urls:
         try:
             video_downloader.download([url])
-            with open(get_video_file(), "rb") as video:
-                bot.send_video(
-                    chat_id,
-                    video,
-                    reply_to_message_id=message_id,
-                    supports_streaming=True,
-                )
+            video_file = get_video_file()
+            if imghdr.what(video_file):
+                make_screenshot(url)
+                with open(IMAGE_FILE, "rb") as _image:
+                    bot.send_photo(chat_id, _image, reply_to_message_id=message_id)
+            else:
+                with open(video_file, "rb") as video:
+                    bot.send_video(
+                        chat_id,
+                        video,
+                        reply_to_message_id=message_id,
+                        supports_streaming=True,
+                    )
+
         except (DownloadError, UnsupportedError):
             try:
-                asyncio.run(
-                    tweet_capture.screenshot(url, IMAGE_FILE, mode=4, night_mode=1)
-                )
+                make_screenshot(url)
                 with open(IMAGE_FILE, "rb") as _image:
                     bot.send_photo(chat_id, _image, reply_to_message_id=message_id)
             except Exception as e:
