@@ -18,8 +18,15 @@ def get_video_file():
 
 def prepare_urls(urls):
     for index, url in enumerate(urls):
-        if url.startswith(("twitter", "www")):
+        if url.startswith("www"):
             urls[index] = "https://" + url
+        # instagram specific
+        if "instagram.com" in url:
+            if "?hl=" in url:
+                prefix, _, postfix = url.partition("?hl=")
+                urls[index] = prefix + "?hl=uk"
+            else:
+                urls[index] = url + "?hl=uk" if url.endswith("/") else url + "/?hl=uk"
     return urls
 
 

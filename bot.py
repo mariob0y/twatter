@@ -3,9 +3,9 @@ import telebot
 from urlextract import URLExtract
 from youtube_dl.YoutubeDL import YoutubeDL
 from youtube_dl.utils import DownloadError, UnsupportedError
-from const import TOKEN, IMAGE_FILE, LOCATORS
-from utils import clear_video_file, get_video_file, prepare_urls, get_url_domain
-from screenshot import make_screenshot
+from const import TOKEN, IMAGE_FILE
+from utils import clear_video_file, get_video_file, prepare_urls
+from screenshot import save_screenshot
 import imghdr
 
 
@@ -36,10 +36,11 @@ def get_text_messages(message):
 
     for url in urls:
         try:
+            # Sometimes yt downloader
             video_downloader.download([url])
             video_file = get_video_file()
             if imghdr.what(video_file):
-                make_screenshot(url)
+                asyncio.run(save_screenshot(url))
                 with open(IMAGE_FILE, "rb") as _image:
                     bot.send_photo(chat_id, _image, reply_to_message_id=message_id)
             else:
@@ -53,7 +54,7 @@ def get_text_messages(message):
 
         except (DownloadError, UnsupportedError):
             try:
-                make_screenshot(url)
+                asyncio.run(save_screenshot(url))
                 with open(IMAGE_FILE, "rb") as _image:
                     bot.send_photo(chat_id, _image, reply_to_message_id=message_id)
             except Exception as e:

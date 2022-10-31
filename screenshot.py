@@ -1,6 +1,6 @@
 import asyncio
-from playwright.async_api import async_playwright, Browser
-from const import IMAGE_FILE, LOCATORS
+from playwright.async_api import async_playwright
+from const import IMAGE_FILE
 from utils import get_url_domain
 from tweetcapture import TweetCapture
 
@@ -9,24 +9,61 @@ tweet_capture = TweetCapture()
 MAX_COMMENT_LIMIT = 10
 
 
-async def capture(browser: Browser, url, locator):
+async def capture_instagram(browser, url):
+    page = await browser.new_page()
+
+    await page.goto(url)
+    posts = page.locator("article")
+
+    try:
+        # try to load comments from post if such are present
+        comments = page.locator('[aria-label="Завантажити більше коментарів"]')
+        await asyncio.wait_for(comments.first.is_enabled(), timeout=10.0)
+    except asyncio.exceptions.TimeoutError:
+        pass
+
+    popup = page.locator('[aria-label="Закрити"]')
+    await popup.first.click()
+    await posts.first.screenshot(path="post.png")
+
+
+async def capture_twitter(browser, url):
+    page = await browser.new_page()
+
+    await page.goto(url)
+    post = page.locator("data-testid=tweet").first
+    # Remove bottom bar with login reminder
+    await page.eval_on_selector(
+        selector="data-testid=BottomBar",
+        expression="(el) => el.style.display = 'none'",
+    )
+    await post.screenshot(path="post.png")
+
+
+async def capture_reddit(browser, url):
     page = await browser.new_page()
     await page.goto(url)
-    posts = page.locator(locator)
+    # Remove top search bar
+    await page.eval_on_selector(
+        selector="header",
+        expression="(el) => el.style.display = 'none'",
+    )
+    posts = page.locator("data-testid=post-container")
     await posts.first.screenshot(path=IMAGE_FILE)
 
 
-async def screenshot(url, locator):
+methods = {
+    "www.instagram.com": capture_instagram,
+    "www.twitter.com": capture_twitter,
+    "www.reddit.com": capture_reddit,
+}
+
+
+async def save_screenshot(url):
     async with async_playwright() as p:
+        capture_method = methods.get(get_url_domain(url), None)
+        if not capture_method:
+            return
         browser = await p.chromium.launch()
-        await capture(browser, url, locator)
+        await capture_method(browser, url)
         await browser.close()
-
-
-def make_screenshot(url):
-    domain = get_url_domain(url)
-    locator = LOCATORS.get(domain, None)
-    if locator:
-        asyncio.run(screenshot(url, locator))
-    else:
-        asyncio.run(tweet_capture.screenshot(url, IMAGE_FILE, mode=4, night_mode=1))
