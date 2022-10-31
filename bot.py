@@ -4,7 +4,7 @@ from urlextract import URLExtract
 from youtube_dl.YoutubeDL import YoutubeDL
 from youtube_dl.utils import DownloadError, UnsupportedError
 from const import TOKEN, IMAGE_FILE
-from utils import clear_video_file, get_video_file, prepare_urls
+from utils import clear_output_files, get_video_file, prepare_urls
 from screenshot import save_screenshot
 import imghdr
 
@@ -25,7 +25,7 @@ def start_message(message):
 
 @bot.message_handler(func=lambda message: True)
 def get_text_messages(message):
-    clear_video_file()
+    clear_output_files()
 
     text = message.text
     message_id = message.message_id

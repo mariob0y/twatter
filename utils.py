@@ -2,9 +2,9 @@ import os
 from urllib.parse import urlparse
 
 
-def clear_video_file():
+def clear_output_files():
     for file in os.listdir("."):
-        if file.endswith((".mp4", ".mkv")):
+        if file.endswith((".mp4", ".mkv", ".png")):
             os.remove(file)
 
 
