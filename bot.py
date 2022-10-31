@@ -1,5 +1,6 @@
 import asyncio
 import telebot
+from tweetcapture import TweetCapture
 from urlextract import URLExtract
 from youtube_dl.YoutubeDL import YoutubeDL
 from youtube_dl.utils import DownloadError, UnsupportedError
@@ -13,6 +14,7 @@ telebot.apihelper.ENABLE_MIDDLEWARE = True
 
 bot = telebot.TeleBot(TOKEN)
 url_extractor = URLExtract()
+tweet_capture = TweetCapture()
 video_downloader = YoutubeDL(
     params={"outtmpl": "video.mp4", "extract_flat": "in_playlist"}
 )
@@ -58,7 +60,14 @@ def get_text_messages(message):
                 with open(IMAGE_FILE, "rb") as _image:
                     bot.send_photo(chat_id, _image, reply_to_message_id=message_id)
             except Exception as e:
-                print(f"Unsupported URL: {url}")
+                try:
+                    asyncio.run(
+                        tweet_capture.screenshot(url, IMAGE_FILE, mode=4, night_mode=1)
+                    )
+                    with open(IMAGE_FILE, "rb") as _image:
+                        bot.send_photo(chat_id, _image, reply_to_message_id=message_id)
+                except Exception as e:
+                    print(f"Unsupported URL: {url}")
 
 
 if __name__ == "__main__":
