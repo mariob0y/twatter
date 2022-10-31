@@ -2,9 +2,7 @@ import asyncio
 from playwright.async_api import async_playwright
 from const import IMAGE_FILE
 from utils import get_url_domain
-from tweetcapture import TweetCapture
 
-tweet_capture = TweetCapture()
 
 MAX_COMMENT_LIMIT = 10
 
