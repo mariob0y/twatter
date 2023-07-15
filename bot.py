@@ -4,7 +4,7 @@ from tweetcapture import TweetCapture
 from urlextract import URLExtract
 from youtube_dl.YoutubeDL import YoutubeDL
 from youtube_dl.utils import DownloadError, UnsupportedError
-from const import TOKEN, IMAGE_FILE
+from const import TOKEN, IMAGE_FILE, BACHYLA_USERNAME
 from utils import clear_output_files, get_video_file, prepare_urls
 from screenshot import save_screenshot
 import imghdr
@@ -32,6 +32,10 @@ def get_text_messages(message):
     text = message.text
     message_id = message.message_id
     chat_id = message.chat.id
+
+    if message.from_user.username == BACHYLA_USERNAME:
+        bot.send_message(chat_id, "бачила", reply_to_message_id=message_id)
+        return
 
     urls = url_extractor.find_urls(text)
     prepare_urls(urls)
