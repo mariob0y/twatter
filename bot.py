@@ -70,9 +70,19 @@ def get_text_messages(message):
                     print(f"Unsupported URL: {url}")
 
         inst_reel_str = "instagram.com/reel"
-        if inst_reel_str in url:
-            url = url.replace(inst_reel_str, f'dd{inst_reel_str}')
+        inst_reel_str_fixed = f'dd{inst_reel_str}'
+        if inst_reel_str in url and inst_reel_str_fixed not in url:
+            url = url.replace(inst_reel_str, inst_reel_str_fixed)
             bot.send_message(chat_id, url, reply_to_message_id=message_id)
+
+        twtr_strs = ['mobile.twitter.com', 'mobile.x.com', 'twitter.com', 'x.com']
+        twtr_str_fixed = 'fxtwitter.com'
+        for twtr_str in twtr_strs:
+            if twtr_str in url and twtr_str_fixed not in url:
+                _url = url.replace(twtr_str, twtr_str_fixed)
+                bot.send_message(chat_id, _url, reply_to_message_id=message_id)
+                break
+
 
 if __name__ == "__main__":
     # for local run
