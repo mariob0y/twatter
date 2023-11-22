@@ -69,6 +69,10 @@ def get_text_messages(message):
                 except Exception as e:
                     print(f"Unsupported URL: {url}")
 
+        inst_reel_str = "instagram.com/reel"
+        if inst_reel_str in url:
+            url = url.replace(inst_reel_str, f'dd{inst_reel_str}')
+            bot.send_message(chat_id, url, reply_to_message_id=message_id)
 
 if __name__ == "__main__":
     # for local run
