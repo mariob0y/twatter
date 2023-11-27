@@ -7,3 +7,4 @@ Werkzeug==2.2.2
 gunicorn==20.1.0
 playwright==1.27.1
 tweet-capture==0.2.3
+cleanurl==0.1.15

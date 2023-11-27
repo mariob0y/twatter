@@ -8,6 +8,7 @@ from const import TOKEN, IMAGE_FILE
 from utils import clear_output_files, get_video_file, prepare_urls
 from screenshot import save_screenshot
 import imghdr
+from cleanurl import cleanurl
 
 
 telebot.apihelper.ENABLE_MIDDLEWARE = True
@@ -37,6 +38,8 @@ def get_text_messages(message):
     prepare_urls(urls)
 
     for url in urls:
+        url = cleanurl(url, respect_semantics=True)
+        url = f'{url.hostname}{url.path}'
         try:
             # Sometimes yt downloader
             video_downloader.download([url])
